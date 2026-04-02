@@ -122,10 +122,10 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
+                    <td id="scroll-up">0</td>
+                    <td id="scroll-down">0</td>
+                    <td id="scroll-left">0</td>
+                    <td id="scroll-right">0</td>
                 </tr>
             </tbody>
         </table>
@@ -169,6 +169,7 @@
     </div>
 
     <script>
+        // Click and Double Click Logic
         const stats = {
             down: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 },
             up: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 },
@@ -200,7 +201,7 @@
         window.addEventListener('mousedown', (e) => {
             if (stats.down.hasOwnProperty(e.button)) {
                 const now = performance.now();
-                const threshold = parseInt(tInput.value) || 300;
+                const threshold = parseInt(tInput.value) || 10;
                 
                 if (now - lastClickTime[e.button] < threshold) {
                     stats.double[e.button]++;
@@ -219,6 +220,32 @@
                 updateDisplay(e.button, 'up');
             }
         });
+
+        // Scroll Logic
+        const scrollStats = {
+            up: 0,
+            down: 0,
+            left: 0,
+            right: 0
+        };
+
+        window.addEventListener('wheel', (e) => {
+            if (e.deltaY < 0) {
+                scrollStats.up++;
+                document.getElementById('scroll-up').textContent = scrollStats.up;
+            } else if (e.deltaY > 0) {
+                scrollStats.down++;
+                document.getElementById('scroll-down').textContent = scrollStats.down;
+            }
+
+            if (e.deltaX < 0) {
+                scrollStats.left++;
+                document.getElementById('scroll-left').textContent = scrollStats.left;
+            } else if (e.deltaX > 0) {
+                scrollStats.right++;
+                document.getElementById('scroll-right').textContent = scrollStats.right;
+            }
+        }, { passive: true });
     </script>
 
 </body>
