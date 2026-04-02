@@ -18,6 +18,17 @@
             gap: 10px;
         }
 
+        .rates-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .rates-row {
+            display: flex;
+            gap: 10px;
+        }
+
         table {
             border-collapse: collapse;
             font-size: 12px;
@@ -27,18 +38,29 @@
             border: 1px solid #fff;
             padding: 4px 8px;
             text-align: center;
+            min-width: 45px;
+        }
+
+        .start-test-row {
+            cursor: pointer;
+        }
+
+        .start-test-row:hover {
+            background-color: #333;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <!-- Clicks Table -->
         <table>
             <thead>
                 <tr>
-                    <th colspan="5">Clicks</th>
+                    <th colspan="6">Clicks</th>
                 </tr>
                 <tr>
+                    <th></th>
                     <th>LMB</th>
                     <th>RMB</th>
                     <th>MMB</th>
@@ -48,6 +70,23 @@
             </thead>
             <tbody>
                 <tr>
+                    <th>Mouse Down</th>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <th>Mouse Up</th>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <th>Double Click</th>
                     <td>0</td>
                     <td>0</td>
                     <td>0</td>
@@ -57,6 +96,7 @@
             </tbody>
         </table>
 
+        <!-- Scroll Table -->
         <table>
             <thead>
                 <tr>
@@ -79,18 +119,42 @@
             </tbody>
         </table>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Polling rate</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>0 Hz</td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- Polling & CPS Column -->
+        <div class="rates-column">
+            <div class="rates-row">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Polling rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>0 Hz</td>
+                        </tr>
+                        <tr class="start-test-row">
+                            <td>Start Test</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Clicks per second</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>0 CPS</td>
+                        </tr>
+                        <tr class="start-test-row">
+                            <td>Start Test</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
 </body>
