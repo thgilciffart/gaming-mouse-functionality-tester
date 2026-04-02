@@ -8,14 +8,19 @@
         body {
             background-color: #000;
             color: #fff;
-            font-family: monospace;
+            font-family: 'Fira Code', monospace;
             margin: 10px;
+        }
+
+        .container {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
         }
 
         table {
             border-collapse: collapse;
             font-size: 12px;
-            margin-bottom: 10px;
         }
 
         th, td {
@@ -27,28 +32,66 @@
 </head>
 <body>
 
-    <table>
-        <thead>
-            <tr>
-                <th></th>
-                <th>LMB</th>
-                <th>RMB</th>
-                <th>MMB</th>
-                <th>MB4</th>
-                <th>MB5</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th>Clicks</th>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="5">Clicks</th>
+                </tr>
+                <tr>
+                    <th>LMB</th>
+                    <th>RMB</th>
+                    <th>MMB</th>
+                    <th>MB4</th>
+                    <th>MB5</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="4">Scroll</th>
+                </tr>
+                <tr>
+                    <th>Up</th>
+                    <th>Down</th>
+                    <th>Left</th>
+                    <th>Right</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Polling rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>0 Hz</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
 </body>
 </html>
