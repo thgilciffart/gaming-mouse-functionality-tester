@@ -10,6 +10,7 @@
             color: #fff;
             font-family: 'Fira Code', monospace;
             margin: 10px;
+            user-select: none;
         }
 
         .container {
@@ -50,7 +51,17 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
+
+    <div class="controls" style="margin-bottom: 15px;">
+        <div style="margin-bottom: 5px; font-size: 12px;">
+            <label for="delta-t">ΔT (ms):</label>
+            <input type="number" id="delta-t" value="10" style="background: #000; color: #fff; border: 1px solid #fff; font-family: 'Fira Code', monospace; font-size: 12px; width: 60px; padding: 2px 4px;">
+        </div>
+        <div style="font-size: 10px; color: #888;">
+            * ΔT: Maximum time (milliseconds) between two clicks to register as a double-click.
+        </div>
+    </div>
 
     <div class="container">
         <!-- Clicks Table -->
@@ -71,27 +82,27 @@
             <tbody>
                 <tr>
                     <th>Mouse Down</th>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
+                    <td id="lmb-down">0</td>
+                    <td id="rmb-down">0</td>
+                    <td id="mmb-down">0</td>
+                    <td id="mb4-down">0</td>
+                    <td id="mb5-down">0</td>
                 </tr>
                 <tr>
                     <th>Mouse Up</th>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
+                    <td id="lmb-up">0</td>
+                    <td id="rmb-up">0</td>
+                    <td id="mmb-up">0</td>
+                    <td id="mb4-up">0</td>
+                    <td id="mb5-up">0</td>
                 </tr>
                 <tr>
                     <th>Double Click</th>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
+                    <td id="lmb-double">0</td>
+                    <td id="rmb-double">0</td>
+                    <td id="mmb-double">0</td>
+                    <td id="mb4-double">0</td>
+                    <td id="mb5-double">0</td>
                 </tr>
             </tbody>
         </table>
@@ -156,6 +167,59 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const stats = {
+            down: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 },
+            up: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 },
+            double: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }
+        };
+
+        const lastClickTime = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
+
+        const buttonMap = {
+            0: 'lmb',
+            1: 'mmb',
+            2: 'rmb',
+            3: 'mb4',
+            4: 'mb5'
+        };
+
+        const tInput = document.getElementById('delta-t');
+
+        function updateDisplay(btn, type) {
+            const key = buttonMap[btn];
+            if (key) {
+                const element = document.getElementById(`${key}-${type}`);
+                if (element) {
+                    element.textContent = stats[type][btn];
+                }
+            }
+        }
+
+        window.addEventListener('mousedown', (e) => {
+            if (stats.down.hasOwnProperty(e.button)) {
+                const now = performance.now();
+                const threshold = parseInt(tInput.value) || 300;
+                
+                if (now - lastClickTime[e.button] < threshold) {
+                    stats.double[e.button]++;
+                    updateDisplay(e.button, 'double');
+                }
+                
+                lastClickTime[e.button] = now;
+                stats.down[e.button]++;
+                updateDisplay(e.button, 'down');
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            if (stats.up.hasOwnProperty(e.button)) {
+                stats.up[e.button]++;
+                updateDisplay(e.button, 'up');
+            }
+        });
+    </script>
 
 </body>
 </html>
