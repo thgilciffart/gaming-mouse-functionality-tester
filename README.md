@@ -14,7 +14,7 @@ You can either use the tool [here](https://mouse-functionality-tester.netlify.ap
 ```bash 
 git clone https://github.com/thgilciffart/gaming-mouse-functionality-tester.git
 ```
-2. 
+2. Change directories
 ```bash 
 cd gaming-mouse-functionality-tester
 ```
