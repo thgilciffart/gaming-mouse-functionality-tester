@@ -60,8 +60,8 @@
             color: #fff;
         }
 
-        /* CPS Overlay */
-        #cps-overlay {
+        /* Test Overlay */
+        #test-overlay {
             display: none;
             position: fixed;
             top: 50%;
@@ -71,6 +71,7 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
+            pointer-events: none; /* Let clicks pass through if needed */
         }
 
         .overlay-content {
@@ -90,10 +91,10 @@
 </head>
 <body oncontextmenu="return false;">
 
-    <div id="cps-overlay">
+    <div id="test-overlay">
         <div class="overlay-content">
-            <div>Click to start a 3 second test</div>
-            <div class="overlay-subtext">Press ESC to cancel</div>
+            <div id="overlay-message">Click to start test</div>
+            <div class="overlay-subtext">Press ESC to stop</div>
         </div>
     </div>
 
@@ -185,10 +186,10 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>0 Hz</td>
+                            <td id="polling-value">0 Hz</td>
                         </tr>
-                        <tr class="start-test-row">
-                            <td>Start Test</td>
+                        <tr class="start-test-row" id="start-polling">
+                            <td id="polling-status">Start Test</td>
                         </tr>
                     </tbody>
                 </table>
@@ -213,6 +214,15 @@
     </div>
 
     <script>
+        // Common Test State
+        let isWaitingForStart = false;
+        let activeTestType = null; // 'cps' or 'polling'
+        let testAnimationId = null;
+        let pollingIntervalId = null;
+
+        const testOverlay = document.getElementById('test-overlay');
+        const overlayMessage = document.getElementById('overlay-message');
+
         // Click and Double Click Logic
         const stats = {
             down: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 },
@@ -235,8 +245,8 @@
         window.addEventListener('mousedown', (e) => {
             if (stats.down.hasOwnProperty(e.button)) {
                 // CPS Start Logic
-                if (isWaitingForStart && e.button === 0) {
-                    startCps();
+                if (isWaitingForStart && activeTestType === 'cps' && e.button === 0) {
+                    startCpsTest();
                     return;
                 }
 
@@ -258,35 +268,96 @@
             }
         });
 
+        window.addEventListener('mouseup', (e) => {
+            if (stats.up.hasOwnProperty(e.button)) {
+                stats.up[e.button]++;
+                updateDisplay(e.button, 'up');
+            }
+        });
+
+        // Scroll Logic
+        const scrollStats = { up: 0, down: 0, left: 0, right: 0 };
+        window.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) scrollStats.up++;
+            else if (e.deltaY > 0) scrollStats.down++;
+            if (e.deltaX < 0) scrollStats.left++;
+            else if (e.deltaX > 0) scrollStats.right++;
+
+            document.getElementById('scroll-up').textContent = scrollStats.up;
+            document.getElementById('scroll-down').textContent = scrollStats.down;
+            document.getElementById('scroll-left').textContent = scrollStats.left;
+            document.getElementById('scroll-right').textContent = scrollStats.right;
+        }, { passive: false });
+
+        // Polling Logic
+        let isPollingActive = false;
+        let pollingEvents = 0;
+        let maxPollingRate = 0;
+        const startPollingBtn = document.getElementById('start-polling');
+        const pollingValue = document.getElementById('polling-value');
+        const pollingStatus = document.getElementById('polling-status');
+
+        startPollingBtn.addEventListener('click', (e) => {
+            if (isCpsActive || isPollingActive || isWaitingForStart) return;
+            e.stopPropagation();
+            
+            document.body.requestPointerLock();
+            
+            isPollingActive = true;
+            pollingEvents = 0;
+            maxPollingRate = 0;
+            activeTestType = 'polling';
+            
+            overlayMessage.textContent = "Move your mouse quickly in large circles";
+            testOverlay.style.display = 'flex';
+            testOverlay.style.pointerEvents = 'none'; // Ensure it doesn't block mouse movement tracking if necessary
+            
+            startPollingBtn.classList.add('active-test');
+            pollingStatus.textContent = "Testing...";
+
+            pollingIntervalId = setInterval(() => {
+                if (pollingEvents > maxPollingRate) {
+                    maxPollingRate = pollingEvents;
+                    pollingValue.textContent = `${maxPollingRate} Hz`;
+                }
+                pollingEvents = 0;
+            }, 1000);
+        });
+
+        window.addEventListener('mousemove', () => {
+            if (isPollingActive) {
+                pollingEvents++;
+            }
+        });
+
         // CPS Logic
         let isCpsActive = false;
-        let isWaitingForStart = false;
         let cpsClicks = 0;
-        let animationId = null;
-
         const startCpsBtn = document.getElementById('start-cps');
         const cpsValue = document.getElementById('cps-value');
         const cpsStatus = document.getElementById('cps-status');
-        const cpsOverlay = document.getElementById('cps-overlay');
 
-        function resetCpsTest() {
-            isCpsActive = false;
-            isWaitingForStart = false;
-            if (animationId) cancelAnimationFrame(animationId);
-            cpsOverlay.style.display = 'none';
-            startCpsBtn.classList.remove('active-test');
-            cpsStatus.textContent = "Start Test";
-        }
+        startCpsBtn.addEventListener('click', (e) => {
+            if (isCpsActive || isPollingActive || isWaitingForStart) return;
+            e.stopPropagation();
+            activeTestType = 'cps';
+            isWaitingForStart = true;
+            overlayMessage.textContent = "Click to start a 3 second CPS test";
+            testOverlay.style.display = 'flex';
+            testOverlay.style.pointerEvents = 'auto'; // Need to click this one
+            document.body.requestPointerLock();
+        });
 
-        function startCps() {
+        function startCpsTest() {
             isWaitingForStart = false;
             isCpsActive = true;
             cpsClicks = 0;
-            cpsOverlay.style.display = 'none';
-            
+            testOverlay.style.display = 'none';
+            startCpsBtn.classList.add('active-test');
+
             const duration = 3000;
             const startTime = performance.now();
-            startCpsBtn.classList.add('active-test');
 
             function updateTimer() {
                 const now = performance.now();
@@ -295,7 +366,7 @@
 
                 if (remaining > 0) {
                     cpsStatus.textContent = (remaining / 1000).toFixed(2) + "s";
-                    animationId = requestAnimationFrame(updateTimer);
+                    testAnimationId = requestAnimationFrame(updateTimer);
                 } else {
                     isCpsActive = false;
                     document.exitPointerLock();
@@ -305,22 +376,31 @@
                     startCpsBtn.classList.remove('active-test');
                 }
             }
-
-            animationId = requestAnimationFrame(updateTimer);
+            testAnimationId = requestAnimationFrame(updateTimer);
         }
 
-        startCpsBtn.addEventListener('click', (e) => {
-            if (isCpsActive || isWaitingForStart) return;
-            e.stopPropagation(); // Prevent the click from immediately starting the test
-            
-            document.body.requestPointerLock();
-            isWaitingForStart = true;
-            cpsOverlay.style.display = 'flex';
-        });
+        // Common Logic
+        function stopTests() {
+            if (isPollingActive) {
+                clearInterval(pollingIntervalId);
+                pollingStatus.textContent = "Start Test";
+                startPollingBtn.classList.remove('active-test');
+            }
+            if (isCpsActive) {
+                if (testAnimationId) cancelAnimationFrame(testAnimationId);
+                cpsStatus.textContent = "Start Test";
+                startCpsBtn.classList.remove('active-test');
+            }
+            isWaitingForStart = false;
+            isCpsActive = false;
+            isPollingActive = false;
+            testOverlay.style.display = 'none';
+            activeTestType = null;
+        }
 
         document.addEventListener('pointerlockchange', () => {
             if (document.pointerLockElement !== document.body) {
-                resetCpsTest();
+                stopTests();
             }
         });
     </script>
