@@ -78,13 +78,23 @@
             padding: 20px 40px;
             font-size: 18px;
             background: #000;
+            text-align: center;
+        }
+
+        .overlay-subtext {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
     <div id="cps-overlay">
-        <div class="overlay-content">Click to start a 3 second test</div>
+        <div class="overlay-content">
+            <div>Click to start a 3 second test</div>
+            <div class="overlay-subtext">Press ESC to cancel</div>
+        </div>
     </div>
 
     <div class="controls" style="margin-bottom: 15px;">
@@ -224,6 +234,12 @@
 
         window.addEventListener('mousedown', (e) => {
             if (stats.down.hasOwnProperty(e.button)) {
+                // CPS Start Logic
+                if (isWaitingForStart && e.button === 0) {
+                    startCps();
+                    return;
+                }
+
                 const now = performance.now();
                 const threshold = parseInt(tInput.value) || 10;
                 
@@ -242,45 +258,32 @@
             }
         });
 
-        window.addEventListener('mouseup', (e) => {
-            if (stats.up.hasOwnProperty(e.button)) {
-                stats.up[e.button]++;
-                updateDisplay(e.button, 'up');
-            }
-        });
-
-        // Scroll Logic
-        const scrollStats = { up: 0, down: 0, left: 0, right: 0 };
-        window.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            if (e.deltaY < 0) scrollStats.up++;
-            else if (e.deltaY > 0) scrollStats.down++;
-            if (e.deltaX < 0) scrollStats.left++;
-            else if (e.deltaX > 0) scrollStats.right++;
-
-            document.getElementById('scroll-up').textContent = scrollStats.up;
-            document.getElementById('scroll-down').textContent = scrollStats.down;
-            document.getElementById('scroll-left').textContent = scrollStats.left;
-            document.getElementById('scroll-right').textContent = scrollStats.right;
-        }, { passive: false });
-
         // CPS Logic
         let isCpsActive = false;
+        let isWaitingForStart = false;
         let cpsClicks = 0;
+        let animationId = null;
+
         const startCpsBtn = document.getElementById('start-cps');
         const cpsValue = document.getElementById('cps-value');
         const cpsStatus = document.getElementById('cps-status');
         const cpsOverlay = document.getElementById('cps-overlay');
 
-        startCpsBtn.addEventListener('click', () => {
-            if (isCpsActive) return;
-            cpsOverlay.style.display = 'flex';
-        });
-
-        cpsOverlay.addEventListener('click', () => {
+        function resetCpsTest() {
+            isCpsActive = false;
+            isWaitingForStart = false;
+            if (animationId) cancelAnimationFrame(animationId);
             cpsOverlay.style.display = 'none';
+            startCpsBtn.classList.remove('active-test');
+            cpsStatus.textContent = "Start Test";
+        }
+
+        function startCps() {
+            isWaitingForStart = false;
             isCpsActive = true;
             cpsClicks = 0;
+            cpsOverlay.style.display = 'none';
+            
             const duration = 3000;
             const startTime = performance.now();
             startCpsBtn.classList.add('active-test');
@@ -292,9 +295,10 @@
 
                 if (remaining > 0) {
                     cpsStatus.textContent = (remaining / 1000).toFixed(2) + "s";
-                    requestAnimationFrame(updateTimer);
+                    animationId = requestAnimationFrame(updateTimer);
                 } else {
                     isCpsActive = false;
+                    document.exitPointerLock();
                     const cps = (cpsClicks / 3).toFixed(1);
                     cpsValue.textContent = `${cps} CPS`;
                     cpsStatus.textContent = "Start Test";
@@ -302,7 +306,22 @@
                 }
             }
 
-            requestAnimationFrame(updateTimer);
+            animationId = requestAnimationFrame(updateTimer);
+        }
+
+        startCpsBtn.addEventListener('click', (e) => {
+            if (isCpsActive || isWaitingForStart) return;
+            e.stopPropagation(); // Prevent the click from immediately starting the test
+            
+            document.body.requestPointerLock();
+            isWaitingForStart = true;
+            cpsOverlay.style.display = 'flex';
+        });
+
+        document.addEventListener('pointerlockchange', () => {
+            if (document.pointerLockElement !== document.body) {
+                resetCpsTest();
+            }
         });
     </script>
 
