@@ -8,11 +8,7 @@ A web-based diagnostic tool designed to test the performance and hardware integr
 
 ## 🚀 Features
   * **Button Actuation Test:** Verify that all mouse buttons (LMB, RMB, MMB, and side buttons) are registering correctly.
-  * **Double-Click Detection:** Uses a configurable millisecond threshold to detect unintended "chatter" or double-clicking caused by worn-out mechanical switches.
-  * **Polling Rate Monitor:** Measures the frequency (Hz) at which your mouse reports its position to the computer, ensuring it hits the advertised speeds (e.g., 500Hz, 1000Hz+).
-  * **Scroll Wheel Consistency:** Detects "scroll jumping" or reverse inputs when scrolling in a single direction.
-  * **Timestamp Resolution:** High-accuracy timing to check for input lag or micro-stutters.
-
+  * **Double-Click Detection:** Uses a configurable millisecond threshold to detect unintended "chatter" or double-clicking caused by worn-out mechanical switches.  * **Scroll Wheel Consistency:** Detects "scroll jumping" or reverse inputs when scrolling in a single direction.
 ## 🛠️ How to Use
 
 1.  **Open the App:** Navigate to the [hosted version of the tool](https://rainbow-unicorn-dd1074.netlify.app/) (or open `index.html` locally).
