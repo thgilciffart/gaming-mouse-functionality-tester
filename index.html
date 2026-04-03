@@ -299,30 +299,10 @@
         const pollingStatus = document.getElementById('polling-status');
 
         startPollingBtn.addEventListener('click', (e) => {
-            if (isCpsActive || isPollingActive || isWaitingForStart) return;
+            if (isCpsActive || isPollingActive || isWaitingForStart || activeTestType) return;
             e.stopPropagation();
-            
-            document.body.requestPointerLock();
-            
-            isPollingActive = true;
-            pollingEvents = 0;
-            maxPollingRate = 0;
             activeTestType = 'polling';
-            
-            overlayMessage.textContent = "Move your mouse quickly in large circles";
-            testOverlay.style.display = 'flex';
-            testOverlay.style.pointerEvents = 'none'; // Ensure it doesn't block mouse movement tracking if necessary
-            
-            startPollingBtn.classList.add('active-test');
-            pollingStatus.textContent = "Testing...";
-
-            pollingIntervalId = setInterval(() => {
-                if (pollingEvents > maxPollingRate) {
-                    maxPollingRate = pollingEvents;
-                    pollingValue.textContent = `${maxPollingRate} Hz`;
-                }
-                pollingEvents = 0;
-            }, 1000);
+            document.body.requestPointerLock();
         });
 
         window.addEventListener('pointermove', (e) => {
@@ -343,13 +323,9 @@
         const cpsStatus = document.getElementById('cps-status');
 
         startCpsBtn.addEventListener('click', (e) => {
-            if (isCpsActive || isPollingActive || isWaitingForStart) return;
+            if (isCpsActive || isPollingActive || isWaitingForStart || activeTestType) return;
             e.stopPropagation();
             activeTestType = 'cps';
-            isWaitingForStart = true;
-            overlayMessage.textContent = "Click to start a 3 second CPS test";
-            testOverlay.style.display = 'flex';
-            testOverlay.style.pointerEvents = 'auto'; // Need to click this one
             document.body.requestPointerLock();
         });
 
@@ -385,13 +361,15 @@
 
         // Common Logic
         function stopTests() {
-            if (isPollingActive) {
+            if (isPollingActive || pollingIntervalId) {
                 clearInterval(pollingIntervalId);
+                pollingIntervalId = null;
                 pollingStatus.textContent = "Start Test";
                 startPollingBtn.classList.remove('active-test');
             }
-            if (isCpsActive) {
+            if (isCpsActive || testAnimationId) {
                 if (testAnimationId) cancelAnimationFrame(testAnimationId);
+                testAnimationId = null;
                 cpsStatus.textContent = "Start Test";
                 startCpsBtn.classList.remove('active-test');
             }
@@ -403,9 +381,36 @@
         }
 
         document.addEventListener('pointerlockchange', () => {
-            if (document.pointerLockElement !== document.body) {
+            if (document.pointerLockElement === document.body) {
+                if (activeTestType === 'polling') {
+                    isPollingActive = true;
+                    pollingEvents = 0;
+                    maxPollingRate = 0;
+                    overlayMessage.textContent = "Move your mouse quickly in large circles";
+                    testOverlay.style.display = 'flex';
+                    testOverlay.style.pointerEvents = 'none';
+                    startPollingBtn.classList.add('active-test');
+                    pollingStatus.textContent = "Testing...";
+                    pollingIntervalId = setInterval(() => {
+                        if (pollingEvents > maxPollingRate) {
+                            maxPollingRate = pollingEvents;
+                            pollingValue.textContent = `${maxPollingRate} Hz`;
+                        }
+                        pollingEvents = 0;
+                    }, 1000);
+                } else if (activeTestType === 'cps') {
+                    isWaitingForStart = true;
+                    overlayMessage.textContent = "Click to start a 3 second CPS test";
+                    testOverlay.style.display = 'flex';
+                    testOverlay.style.pointerEvents = 'auto';
+                }
+            } else {
                 stopTests();
             }
+        });
+
+        document.addEventListener('pointerlockerror', () => {
+            stopTests();
         });
     </script>
 
