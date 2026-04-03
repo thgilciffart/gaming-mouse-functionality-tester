@@ -325,9 +325,13 @@
             }, 1000);
         });
 
-        window.addEventListener('mousemove', () => {
+        window.addEventListener('pointermove', (e) => {
             if (isPollingActive) {
-                pollingEvents++;
+                if (e.getCoalescedEvents) {
+                    pollingEvents += e.getCoalescedEvents().length;
+                } else {
+                    pollingEvents++;
+                }
             }
         });
 
