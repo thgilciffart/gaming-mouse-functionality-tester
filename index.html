@@ -59,9 +59,33 @@
             background-color: #c00 !important;
             color: #fff;
         }
+
+        /* CPS Overlay */
+        #cps-overlay {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .overlay-content {
+            border: 1px solid #fff;
+            padding: 20px 40px;
+            font-size: 18px;
+            background: #000;
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
+
+    <div id="cps-overlay">
+        <div class="overlay-content">Click to start a 3 second test</div>
+    </div>
 
     <div class="controls" style="margin-bottom: 15px;">
         <div style="margin-bottom: 5px; font-size: 12px;">
@@ -212,7 +236,6 @@
                 stats.down[e.button]++;
                 updateDisplay(e.button, 'down');
 
-                // Track CPS if test is active
                 if (isCpsActive && e.button === 0) {
                     cpsClicks++;
                 }
@@ -247,10 +270,15 @@
         const startCpsBtn = document.getElementById('start-cps');
         const cpsValue = document.getElementById('cps-value');
         const cpsStatus = document.getElementById('cps-status');
+        const cpsOverlay = document.getElementById('cps-overlay');
 
         startCpsBtn.addEventListener('click', () => {
             if (isCpsActive) return;
+            cpsOverlay.style.display = 'flex';
+        });
 
+        cpsOverlay.addEventListener('click', () => {
+            cpsOverlay.style.display = 'none';
             isCpsActive = true;
             cpsClicks = 0;
             const duration = 3000;
