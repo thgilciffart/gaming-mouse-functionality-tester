@@ -12,7 +12,6 @@
             margin: 0;
             padding: 10px;
             user-select: none;
-            /* Prevent horizontal navigation gestures */
             overscroll-behavior: none;
             overflow: hidden;
             height: 100vh;
@@ -54,6 +53,11 @@
 
         .start-test-row:hover {
             background-color: #333;
+        }
+
+        .active-test {
+            background-color: #c00 !important;
+            color: #fff;
         }
     </style>
 </head>
@@ -163,10 +167,10 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>0 CPS</td>
+                            <td id="cps-value">0 CPS</td>
                         </tr>
-                        <tr class="start-test-row">
-                            <td>Start Test</td>
+                        <tr class="start-test-row" id="start-cps">
+                            <td id="cps-status">Start Test</td>
                         </tr>
                     </tbody>
                 </table>
@@ -183,24 +187,14 @@
         };
 
         const lastClickTime = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
-
-        const buttonMap = {
-            0: 'lmb',
-            1: 'mmb',
-            2: 'rmb',
-            3: 'mb4',
-            4: 'mb5'
-        };
-
+        const buttonMap = { 0: 'lmb', 1: 'mmb', 2: 'rmb', 3: 'mb4', 4: 'mb5' };
         const tInput = document.getElementById('delta-t');
 
         function updateDisplay(btn, type) {
             const key = buttonMap[btn];
             if (key) {
                 const element = document.getElementById(`${key}-${type}`);
-                if (element) {
-                    element.textContent = stats[type][btn];
-                }
+                if (element) element.textContent = stats[type][btn];
             }
         }
 
@@ -217,6 +211,11 @@
                 lastClickTime[e.button] = now;
                 stats.down[e.button]++;
                 updateDisplay(e.button, 'down');
+
+                // Track CPS if test is active
+                if (isCpsActive && e.button === 0) {
+                    cpsClicks++;
+                }
             }
         });
 
@@ -228,33 +227,55 @@
         });
 
         // Scroll Logic
-        const scrollStats = {
-            up: 0,
-            down: 0,
-            left: 0,
-            right: 0
-        };
-
+        const scrollStats = { up: 0, down: 0, left: 0, right: 0 };
         window.addEventListener('wheel', (e) => {
-            // Prevent browser back/forward navigation gestures
             e.preventDefault();
+            if (e.deltaY < 0) scrollStats.up++;
+            else if (e.deltaY > 0) scrollStats.down++;
+            if (e.deltaX < 0) scrollStats.left++;
+            else if (e.deltaX > 0) scrollStats.right++;
 
-            if (e.deltaY < 0) {
-                scrollStats.up++;
-                document.getElementById('scroll-up').textContent = scrollStats.up;
-            } else if (e.deltaY > 0) {
-                scrollStats.down++;
-                document.getElementById('scroll-down').textContent = scrollStats.down;
-            }
-
-            if (e.deltaX < 0) {
-                scrollStats.left++;
-                document.getElementById('scroll-left').textContent = scrollStats.left;
-            } else if (e.deltaX > 0) {
-                scrollStats.right++;
-                document.getElementById('scroll-right').textContent = scrollStats.right;
-            }
+            document.getElementById('scroll-up').textContent = scrollStats.up;
+            document.getElementById('scroll-down').textContent = scrollStats.down;
+            document.getElementById('scroll-left').textContent = scrollStats.left;
+            document.getElementById('scroll-right').textContent = scrollStats.right;
         }, { passive: false });
+
+        // CPS Logic
+        let isCpsActive = false;
+        let cpsClicks = 0;
+        const startCpsBtn = document.getElementById('start-cps');
+        const cpsValue = document.getElementById('cps-value');
+        const cpsStatus = document.getElementById('cps-status');
+
+        startCpsBtn.addEventListener('click', () => {
+            if (isCpsActive) return;
+
+            isCpsActive = true;
+            cpsClicks = 0;
+            const duration = 3000;
+            const startTime = performance.now();
+            startCpsBtn.classList.add('active-test');
+
+            function updateTimer() {
+                const now = performance.now();
+                const elapsed = now - startTime;
+                const remaining = Math.max(0, duration - elapsed);
+
+                if (remaining > 0) {
+                    cpsStatus.textContent = (remaining / 1000).toFixed(2) + "s";
+                    requestAnimationFrame(updateTimer);
+                } else {
+                    isCpsActive = false;
+                    const cps = (cpsClicks / 3).toFixed(1);
+                    cpsValue.textContent = `${cps} CPS`;
+                    cpsStatus.textContent = "Start Test";
+                    startCpsBtn.classList.remove('active-test');
+                }
+            }
+
+            requestAnimationFrame(updateTimer);
+        });
     </script>
 
 </body>
