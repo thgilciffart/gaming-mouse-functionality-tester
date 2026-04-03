@@ -10,6 +10,12 @@ A completely free, open-source offline webapp that is designed to test if your m
 
 ## Usage
 You can either use the tool [here](https://mouse-functionality-tester.netlify.app/) or use it locally.
-1. Clone the repo ```bash git clone https://github.com/thgilciffart/gaming-mouse-functionality-tester.git```
-2. ```bash cd gaming-mouse-functionality-tester```
+1. Clone the repo 
+```bash 
+git clone https://github.com/thgilciffart/gaming-mouse-functionality-tester.git
+```
+2. 
+```bash 
+cd gaming-mouse-functionality-tester
+```
 3. Open ``index.html``
