@@ -19,3 +19,4 @@ git clone https://github.com/thgilciffart/gaming-mouse-functionality-tester.git
 cd gaming-mouse-functionality-tester
 ```
 3. Open ``index.html``
+For checking the click/scroll-wheel , just click/scroll anywhere on the page. For the polling rate and CPS test, please press 'Start test' before beginning 
