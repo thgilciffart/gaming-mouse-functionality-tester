@@ -5,12 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mouse Test</title>
     <style>
-        body {
+        html, body {
             background-color: #000;
             color: #fff;
             font-family: 'Fira Code', monospace;
-            margin: 10px;
+            margin: 0;
+            padding: 10px;
             user-select: none;
+            /* Prevent horizontal navigation gestures */
+            overscroll-behavior: none;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
         }
 
         .container {
@@ -230,6 +236,9 @@
         };
 
         window.addEventListener('wheel', (e) => {
+            // Prevent browser back/forward navigation gestures
+            e.preventDefault();
+
             if (e.deltaY < 0) {
                 scrollStats.up++;
                 document.getElementById('scroll-up').textContent = scrollStats.up;
@@ -245,7 +254,7 @@
                 scrollStats.right++;
                 document.getElementById('scroll-right').textContent = scrollStats.right;
             }
-        }, { passive: true });
+        }, { passive: false });
     </script>
 
 </body>
