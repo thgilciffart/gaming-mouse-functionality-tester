@@ -87,9 +87,82 @@
             color: #888;
             margin-top: 10px;
         }
+
+        /* Instruction Overlay */
+        #instruction-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .instruction-content {
+            border: 1px solid #fff;
+            padding: 30px;
+            background: #000;
+            max-width: 500px;
+            width: 90%;
+            user-select: text;
+        }
+
+        .instruction-content h2 {
+            margin-top: 0;
+            color: #fff;
+        }
+
+        .instruction-content ul {
+            text-align: left;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+
+        .close-btn {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            font-family: 'Fira Code', monospace;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            background: #ccc;
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
+
+    <div id="instruction-overlay">
+        <div class="instruction-content">
+            <h2 style="color: #fff; margin-top: 0;">HELP</h2>
+            <div style="text-align: left; font-size: 14px; line-height: 1.6; margin: 20px 0;">
+                <h3 style="color: #fff; margin-bottom: 5px;"># Clicks</h3>
+                <p style="margin: 0 0 10px 0;">- Click to your hearts content! Left click, right click, middle click and backwards and forwards.</p>
+                <p style="margin: 0 0 20px 0;">- Clicks will ONLY register as a double click if the consecutive click is within the threshold set by the ΔT variable. For example if you click once and then again 50ms after which is under the default threshold, this will register as a double click</p>
+
+                <h3 style="color: #fff; margin-bottom: 5px;"># Scroll</h3>
+                <p style="margin: 0 0 10px 0;">- Scroll any direction you want! Up down left right</p>
+                <p style="margin: 0 0 10px 0;">- You may need a trackpad to scroll left and right though</p>
+                <p style="margin: 0 0 20px 0;">- This is useful as some mice are faulty and register a scroll in the opposite direction. For example for every 100 scrolls down it will register a false scroll up.</p>
+
+                <h3 style="color: #fff; margin-bottom: 5px;"># Polling rate test</h3>
+                <p style="margin: 0 0 20px 0;">- Useful to check if your mouse is running at the correct polling. If you are using Windows 11 23H2 (check by running winver in the win+r menu) then you must be selecting the window</p>
+
+                <h3 style="color: #fff; margin-bottom: 5px;"># CPS test</h3>
+                <p style="margin: 0 0 20px 0;">- A quick 3 second test to see how fast you can click!</p>
+            </div>
+            <button class="close-btn" id="close-instructions">GOT IT</button>
+        </div>
+    </div>
 
     <div id="test-overlay">
         <div class="overlay-content">
@@ -98,14 +171,17 @@
         </div>
     </div>
 
-    <div class="controls" style="margin-bottom: 15px;">
-        <div style="margin-bottom: 5px; font-size: 12px;">
-            <label for="delta-t">ΔT (ms):</label>
-            <input type="number" id="delta-t" value="80" style="background: #000; color: #fff; border: 1px solid #fff; font-family: 'Fira Code', monospace; font-size: 12px; width: 60px; padding: 2px 4px;">
+    <div class="controls" style="margin-bottom: 15px; display: flex; align-items: flex-end; gap: 20px;">
+        <div>
+            <div style="margin-bottom: 5px; font-size: 12px;">
+                <label for="delta-t">ΔT (ms):</label>
+                <input type="number" id="delta-t" value="80" style="background: #000; color: #fff; border: 1px solid #fff; font-family: 'Fira Code', monospace; font-size: 12px; width: 60px; padding: 2px 4px;">
+            </div>
+            <div style="font-size: 10px; color: #888;">
+                * ΔT: Maximum time (milliseconds) between two clicks to register as a double-click.
+            </div>
         </div>
-        <div style="font-size: 10px; color: #888;">
-            * ΔT: Maximum time (milliseconds) between two clicks to register as a double-click.
-        </div>
+        <button id="open-help" style="background: #000; color: #fff; border: 1px solid #fff; font-family: 'Fira Code', monospace; font-size: 12px; padding: 4px 10px; cursor: pointer;">HELP</button>
     </div>
 
     <div class="container">
@@ -222,6 +298,24 @@
 
         const testOverlay = document.getElementById('test-overlay');
         const overlayMessage = document.getElementById('overlay-message');
+
+        // Instruction Popup Logic
+        const instructionOverlay = document.getElementById('instruction-overlay');
+        const closeBtn = document.getElementById('close-instructions');
+        const openHelpBtn = document.getElementById('open-help');
+
+        if (!localStorage.getItem('mouse_test_instructions_shown')) {
+            instructionOverlay.style.display = 'flex';
+        }
+
+        closeBtn.onclick = () => {
+            instructionOverlay.style.display = 'none';
+            localStorage.setItem('mouse_test_instructions_shown', 'true');
+        };
+
+        openHelpBtn.onclick = () => {
+            instructionOverlay.style.display = 'flex';
+        };
 
         // Click and Double Click Logic
         const stats = {
