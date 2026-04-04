@@ -238,7 +238,12 @@
             const key = buttonMap[btn];
             if (key) {
                 const element = document.getElementById(`${key}-${type}`);
-                if (element) element.textContent = stats[type][btn];
+                if (element) {
+                    element.textContent = stats[type][btn];
+                    if (type === 'double' && stats[type][btn] > 0) {
+                        element.style.color = 'red';
+                    }
+                }
             }
         }
 
